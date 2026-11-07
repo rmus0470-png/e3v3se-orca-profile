@@ -39,16 +39,26 @@ This log records actions actually completed in the Ender 3 V3 SE calibration/set
 - Cura Marketplace showed **Moonraker Connection 1.9.1** and **Moonraker Print Follower 6.0.0** as installed.
 - Cura Preferences > Printers showed plugin controls **Configure Moonraker** and **Connect Moonraker** for the existing printer.
 - The Moonraker host is known to be `10.0.0.224`; the exact Cura plugin connection configuration has not yet been verified or tested in this session.
-- Cura Monitor displayed a camera-not-configured message.
+- Cura Monitor previously displayed a camera-not-configured message.
 - The independent webcam stream is confirmed working at `http://10.0.0.225:8081/?action=stream`.
-- Cura camera configuration is NOT yet completed.
-- **Crowsnest was not installed during this work.** Its installation status on the Klipper container has not been checked. Do not assume it is installed or absent without inspecting the Klipper container.
-- No changes were made to the working MJPG-Streamer service while discussing Cura camera integration.
+- On CT 224, checked for Crowsnest: `command -v crowsnest` returned no executable and `systemctl status crowsnest` reported that `crowsnest.service` could not be found.
+- Reopened the existing KIAUH installer at `/root/kiauh/kiauh.sh` and selected Crowsnest. KIAUH downloaded the source to `/root/crowsnest`, but installation failed because Crowsnest's installer rejects execution as root. No Crowsnest service was created. CT 224 is a root-based Debian 13 container with no regular user accounts or `/home` directory. No workaround or forced installation was performed.
+- Moonraker on CT 224 initially reported an empty webcam list using `GET /server/webcams/list`.
+- Registered the existing external MJPG-Streamer feed through Moonraker's webcam API with:
+  - Name: `Ender Camera`
+  - Location: `printer`
+  - Service: `mjpegstreamer`
+  - Stream URL: `http://10.0.0.225:8081/?action=stream`
+  - Target FPS: 15; idle FPS: 5; aspect ratio: 16:9; enabled: true.
+- Moonraker returned a successful webcam object and a subsequent `GET /server/webcams/list` confirmed the saved `Ender Camera` entry.
+- **Still unverified:** the live camera picture has not yet been visually confirmed inside the Mainsail dashboard.
+- **Still unverified:** Cura camera display/configuration. Registering the camera with Moonraker does not by itself prove Cura's Monitor view displays it.
+- The working MJPG-Streamer service on CT 225 was not changed during this integration work.
 
 ## Explicitly not completed / do not assume
 
-- Do not assume Crowsnest is installed.
+- Do not assume Crowsnest is installed. Its source was downloaded, but its installation failed and no service was created.
 - Do not assume the Cura Moonraker plugin is connected successfully.
-- Do not assume Cura camera integration is configured.
+- Do not assume the live camera picture has been confirmed in Mainsail or Cura.
 - Do not replace the stable AppImage filename with a versioned filename during future Cura updates.
 - Do not remove the old Cura 5.13 AppImage from Downloads until the user explicitly decides it is no longer needed.
